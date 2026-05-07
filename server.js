@@ -127,12 +127,13 @@ body{
 h1{
   text-align:center;
   margin-bottom:30px;
+  font-size:40px;
 }
 
 .search{
   width:100%;
   max-width:700px;
-  margin:0 auto 20px auto;
+  margin:0 auto 10px auto;
   display:block;
   padding:12px;
   border:none;
@@ -140,6 +141,25 @@ h1{
   background:#1f1f1f;
   color:white;
   font-size:16px;
+}
+
+/* indications colonnes */
+.columns{
+  max-width:900px;
+  margin:0 auto 15px auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 15px;
+  opacity:0.7;
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.columns-left{
+  display:flex;
+  gap:100px;
 }
 
 .board{
@@ -155,6 +175,12 @@ h1{
   margin-bottom:10px;
   padding:15px;
   border-radius:10px;
+  border-left:6px solid transparent;
+  transition:0.2s;
+}
+
+.row:hover{
+  transform:scale(1.01);
 }
 
 .left{
@@ -165,19 +191,53 @@ h1{
 .rank{
   font-size:15px;
   font-weight:bold;
+  opacity:0.7;
 }
 
 .pseudo{
-  font-size:20px;
+  font-size:22px;
+  font-weight:bold;
 }
 
+/* catégorie en gros + couleur */
 .category{
-  opacity:0.7;
-  font-size:20px;
+  margin-top:5px;
+  font-size:18px;
+  font-weight:bold;
+  text-transform:uppercase;
+  padding:4px 10px;
+  border-radius:8px;
+  width:fit-content;
+}
+
+/* couleurs catégories */
+.category.bronze{
+  background:#5a3a1b;
+  color:#ffb36b;
+}
+
+.category.silver{
+  background:#3d3d3d;
+  color:#d6d6d6;
+}
+
+.category.gold{
+  background:#5c4b00;
+  color:#ffd700;
+}
+
+.category.diamond{
+  background:#003c4d;
+  color:#57e3ff;
+}
+
+.category.master{
+  background:#3d004d;
+  color:#ff59ff;
 }
 
 .score{
-  font-size:15px;
+  font-size:28px;
   font-weight:bold;
 }
 
@@ -195,21 +255,68 @@ h1{
   oninput="filterBoard()"
 />
 
+<!-- indications colonnes -->
+<div class="columns">
+
+  <div class="columns-left">
+    <div>Position</div>
+    <div>Joueur / Catégorie</div>
+  </div>
+
+  <div>Scores</div>
+
+</div>
+
 <div class="board" id="board">
 `;
 
   allPlayers.forEach((p, i) => {
 
+    // classe couleur catégorie
+    let catClass = "";
+
+    if(p.categorie.toLowerCase() === "bronze"){
+      catClass = "bronze";
+    }
+
+    if(p.categorie.toLowerCase() === "silver"){
+      catClass = "silver";
+    }
+
+    if(p.categorie.toLowerCase() === "gold"){
+      catClass = "gold";
+    }
+
+    if(p.categorie.toLowerCase() === "diamond"){
+      catClass = "diamond";
+    }
+
+    if(p.categorie.toLowerCase() === "master"){
+      catClass = "master";
+    }
+
     html += `
 <div class="row searchable">
 
   <div class="left">
-    <div class="rank">#${i + 1}</div>
-    <div class="pseudo">${p.pseudo}</div>
-    <div class="category">${p.categorie}</div>
+
+    <div class="rank">
+      #${i + 1}
+    </div>
+
+    <div class="pseudo">
+      ${p.pseudo}
+    </div>
+
+    <div class="category ${catClass}">
+      ${p.categorie}
+    </div>
+
   </div>
 
-  <div class="score">${p.score}</div>
+  <div class="score">
+    ${p.score}
+  </div>
 
 </div>
 `;
