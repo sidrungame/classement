@@ -26,6 +26,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 // DATA
 // ==========================
 let classements = {};
+let couleursCategories = {};
 
 // ==========================
 // GITHUB HELPERS
@@ -147,8 +148,8 @@ h1{
 .columns{
   max-width:900px;
   margin:0 auto 15px auto;
-  display:flex;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:80px 1fr 120px;
   align-items:center;
   padding:0 15px;
   opacity:0.7;
@@ -157,9 +158,16 @@ h1{
   letter-spacing:1px;
 }
 
-.columns-left{
-  display:flex;
-  gap:100px;
+.column-rank{
+  text-align:left;
+}
+
+.column-player{
+  text-align:left;
+}
+
+.column-score{
+  text-align:right;
 }
 
 .board{
@@ -195,7 +203,7 @@ h1{
 }
 
 .pseudo{
-  font-size:22px;
+  font-size:15px;
   font-weight:bold;
 }
 
@@ -208,37 +216,6 @@ h1{
   padding:4px 10px;
   border-radius:8px;
   width:fit-content;
-}
-
-/* couleurs catégories */
-.category.bronze{
-  background:#5a3a1b;
-  color:#ffb36b;
-}
-
-.category.silver{
-  background:#3d3d3d;
-  color:#d6d6d6;
-}
-
-.category.gold{
-  background:#5c4b00;
-  color:#ffd700;
-}
-
-.category.diamond{
-  background:#003c4d;
-  color:#57e3ff;
-}
-
-.category.master{
-  background:#3d004d;
-  color:#ff59ff;
-}
-
-.score{
-  font-size:28px;
-  font-weight:bold;
 }
 
 </style>
@@ -258,12 +235,17 @@ h1{
 <!-- indications colonnes -->
 <div class="columns">
 
-  <div class="columns-left">
-    <div>Position</div>
-    <div>Joueur / Catégorie</div>
+  <div class="column-rank">
+    Position
   </div>
 
-  <div>Scores</div>
+  <div class="column-player">
+    Joueur / Catégorie
+  </div>
+
+  <div class="column-score">
+    Scores
+  </div>
 
 </div>
 
@@ -271,29 +253,6 @@ h1{
 `;
 
   allPlayers.forEach((p, i) => {
-
-    // classe couleur catégorie
-    let catClass = "";
-
-    if(p.categorie.toLowerCase() === "bronze"){
-      catClass = "bronze";
-    }
-
-    if(p.categorie.toLowerCase() === "silver"){
-      catClass = "silver";
-    }
-
-    if(p.categorie.toLowerCase() === "gold"){
-      catClass = "gold";
-    }
-
-    if(p.categorie.toLowerCase() === "diamond"){
-      catClass = "diamond";
-    }
-
-    if(p.categorie.toLowerCase() === "master"){
-      catClass = "master";
-    }
 
     html += `
 <div class="row searchable">
@@ -308,9 +267,12 @@ h1{
       ${p.pseudo}
     </div>
 
-    <div class="category ${catClass}">
-      ${p.categorie}
-    </div>
+    <div
+  class="category"
+  style="background:${couleursCategories[p.categorie] || '#222'};"
+>
+  ${p.categorie}
+</div>
 
   </div>
 
@@ -440,6 +402,24 @@ wss.on("connection", ws => {
       ws.send("deleted");
       return;
     }
+  
+// =========================
+// CCL|category/color
+// =========================
+if (message.startsWith("CCL|")) {
+
+  const [cat, color] = message.slice(4).split("/");
+
+  if (!cat || !color) {
+    ws.send("format error");
+    return;
+  }
+
+  couleursCategories[cat] = color;
+
+  ws.send("color updated");
+  return;
+}
 
     ws.send("unknown command");
   });
