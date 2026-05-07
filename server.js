@@ -101,7 +101,8 @@ app.get("/leaderboard", (req, res) => {
       allPlayers.push({
         categorie: cat,
         pseudo: player.pseudo,
-        score: player.score
+        score: player.score,
+        date: player.date || "Inconnue"
       });
     });
   }
@@ -217,6 +218,45 @@ h1{
   border-radius:8px;
   width:fit-content;
 }
+/* popup */
+.popup{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+.popup-content{
+  background:#1a1a1a;
+  padding:30px;
+  border-radius:15px;
+  width:90%;
+  max-width:400px;
+  position:relative;
+}
+
+.popup-close{
+  position:absolute;
+  top:10px;
+  right:15px;
+  font-size:25px;
+  cursor:pointer;
+}
+
+.popup-content h2{
+  margin-top:0;
+}
+
+.popup-info{
+  margin:10px 0;
+  font-size:18px;
+}
 
 </style>
 </head>
@@ -276,9 +316,19 @@ h1{
 
   </div>
 
-  <div class="score">
-    ${p.score}
-  </div>
+  <div
+  class="score"
+  onclick='openPopup(
+    "${p.pseudo}",
+    "${p.categorie}",
+    "${p.score}",
+    "${i + 1}",
+    "${p.date}"
+  )'
+  style="cursor:pointer;"
+>
+  ${p.score}
+</div>
 
 </div>
 `;
@@ -287,8 +337,50 @@ h1{
 
   html += `
 </div>
+<div class="popup" id="popup">
+
+  <div class="popup-content">
+
+    <div class="popup-close" onclick="closePopup()">
+      ✖
+    </div>
+
+    <h2>Détails du score</h2>
+
+    <div class="popup-info" id="popupPseudo"></div>
+    <div class="popup-info" id="popupCategorie"></div>
+    <div class="popup-info" id="popupClassement"></div>
+    <div class="popup-info" id="popupScore"></div>
+    <div class="popup-info" id="popupDate"></div>
+
+  </div>
+
+</div>
 
 <script>
+function openPopup(pseudo, categorie, score, classement, date){
+
+  document.getElementById("popup").style.display = "flex";
+
+  document.getElementById("popupPseudo").innerHTML =
+    "<b>Joueur :</b> " + pseudo;
+
+  document.getElementById("popupCategorie").innerHTML =
+    "<b>Catégorie :</b> " + categorie;
+
+  document.getElementById("popupClassement").innerHTML =
+    "<b>Classement :</b> #" + classement;
+
+  document.getElementById("popupScore").innerHTML =
+    "<b>Score :</b> " + score;
+
+  document.getElementById("popupDate").innerHTML =
+    "<b>Date :</b> " + date;
+}
+
+function closePopup(){
+  document.getElementById("popup").style.display = "none";
+}
 
 function filterBoard(){
 
@@ -371,10 +463,15 @@ wss.on("connection", ws => {
 
       if (existing) {
         if (parseInt(score) > existing.score) {
-          existing.score = parseInt(score);
+       existing.score = parseInt(score);
+       existing.date = new Date().toLocaleString("fr-FR");
         }
       } else {
-        list.push({ pseudo, score: parseInt(score) });
+        list.push({
+  pseudo,
+  score: parseInt(score),
+  date: new Date().toLocaleString("fr-FR")
+});
       }
 
       list.sort((a, b) => b.score - a.score);
