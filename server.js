@@ -93,49 +93,168 @@ async function saveClassements() {
 // ==========================
 app.get("/leaderboard", (req, res) => {
 
+  let allPlayers = [];
+
+  for (const cat in classements) {
+    classements[cat].forEach(player => {
+      allPlayers.push({
+        categorie: cat,
+        pseudo: player.pseudo,
+        score: player.score
+      });
+    });
+  }
+
+  allPlayers.sort((a, b) => b.score - a.score);
+
   let html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8"/>
 <title>Leaderboard</title>
+
 <style>
-body { font-family: Arial; background:#0f0f0f; color:white; padding:20px; }
-h1 { text-align:center; }
-.cat { max-width:600px; margin:20px auto; background:#1a1a1a; padding:15px; border-radius:10px; }
-.row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #333; }
+
+body{
+  margin:0;
+  background:#0f0f0f;
+  color:white;
+  font-family:Arial;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+.search{
+  width:100%;
+  max-width:700px;
+  margin:0 auto 20px auto;
+  display:block;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#1f1f1f;
+  color:white;
+  font-size:16px;
+}
+
+.board{
+  max-width:900px;
+  margin:auto;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#1a1a1a;
+  margin-bottom:10px;
+  padding:15px;
+  border-radius:10px;
+}
+
+.left{
+  display:flex;
+  flex-direction:column;
+}
+
+.rank{
+  font-size:15px;
+  font-weight:bold;
+}
+
+.pseudo{
+  font-size:20px;
+}
+
+.category{
+  opacity:0.7;
+  font-size:20px;
+}
+
+.score{
+  font-size:15px;
+  font-weight:bold;
+}
+
 </style>
 </head>
+
 <body>
-<h1>🏆 Leaderboard</h1>
+
+<h1>🏆 Leaderboard sidrungame</h1>
+
+<input
+  id="search"
+  class="search"
+  placeholder="Rechercher pseudo, catégorie ou score..."
+  oninput="filterBoard()"
+/>
+
+<div class="board" id="board">
 `;
 
-  for (const cat in classements) {
-    html += `<div class="cat"><h2>${cat}</h2>`;
+  allPlayers.forEach((p, i) => {
 
-    classements[cat]
-      .slice(0, 20)
-      .forEach((e, i) => {
-        html += `
-          <div class="row">
-            <span>${i + 1}. ${e.pseudo}</span>
-            <b>${e.score}</b>
-          </div>
-        `;
-      });
+    html += `
+<div class="row searchable">
 
-    html += `</div>`;
-  }
+  <div class="left">
+    <div class="rank">#${i + 1}</div>
+    <div class="pseudo">${p.pseudo}</div>
+    <div class="category">${p.categorie}</div>
+  </div>
+
+  <div class="score">${p.score}</div>
+
+</div>
+`;
+
+  });
 
   html += `
+</div>
+
 <script>
-setTimeout(() => location.reload(), 3000);
+
+function filterBoard(){
+
+  const value =
+    document.getElementById("search")
+    .value
+    .toLowerCase();
+
+  const rows =
+    document.querySelectorAll(".searchable");
+
+  rows.forEach(row => {
+
+    if(row.innerText.toLowerCase().includes(value)){
+      row.style.display = "flex";
+    } else {
+      row.style.display = "none";
+    }
+
+  });
+}
+
+// refresh toutes les 2 minutes
+setTimeout(() => {
+  location.reload();
+}, 120000);
+
 </script>
+
 </body>
 </html>
 `;
 
   res.send(html);
+
 });
 
 // ==========================
