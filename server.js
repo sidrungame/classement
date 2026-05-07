@@ -295,7 +295,17 @@ h1{
   allPlayers.forEach((p, i) => {
 
     html += `
-<div class="row searchable">
+<div
+  class="row searchable"
+  onclick='openPopup(
+    "${p.pseudo}",
+    "${p.categorie}",
+    "${p.score}",
+    "${i + 1}",
+    "${p.date}"
+  )'
+  style="cursor:pointer;"
+>
 
   <div class="left">
 
@@ -318,14 +328,6 @@ h1{
 
   <div
   class="score"
-  onclick='openPopup(
-    "${p.pseudo}",
-    "${p.categorie}",
-    "${p.score}",
-    "${i + 1}",
-    "${p.date}"
-  )'
-  style="cursor:pointer;"
 >
   ${p.score}
 </div>
@@ -464,13 +466,17 @@ wss.on("connection", ws => {
       if (existing) {
         if (parseInt(score) > existing.score) {
        existing.score = parseInt(score);
-       existing.date = new Date().toLocaleString("fr-FR");
+       existing.date = new Date().toLocaleString("fr-FR", {
+  timeZone: "Europe/Paris"
+})
         }
       } else {
-        list.push({
+       list.push({
   pseudo,
   score: parseInt(score),
-  date: new Date().toLocaleString("fr-FR")
+  date: new Date().toLocaleString("fr-FR", {
+    timeZone: "Europe/Paris"
+  })
 });
       }
 
